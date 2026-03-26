@@ -18,7 +18,19 @@ M.available_variants = {
 
 -- Apply the current state to Neovim
 function M.Apply()
-  -- 1. Set background mode
+  -- 1. Auto-detect mode based on theme/variant
+  if (M.theme == "catppuccin" and M.variant == "latte") or
+     (M.theme == "tokyonight" and M.variant == "day") or
+     (M.theme == "rose-pine" and M.variant == "dawn") then
+    M.mode = "light"
+  elseif M.theme == "everforest" or M.theme == "gruvbox-material" then
+    -- These depend on what the user sets, but usually we can default to dark
+    -- unless they specifically toggle light mode.
+  else
+    M.mode = "dark"
+  end
+
+  -- 2. Set background mode
   vim.o.background = M.mode
   
   -- 2. Configure variants BEFORE loading colorscheme
@@ -63,7 +75,10 @@ function M.Apply()
     end
   end
 
-  -- 5. Persist state
+  -- 5. Cursor Visibility Enhancement
+  M.FixCursor()
+
+  -- 6. Persist state
   local f = io.open(theme_state_file, "w")
   if f then
     f:write(string.format("%s:%s:%s:%s", M.theme, M.variant, M.mode, tostring(M.transparent)))
@@ -88,9 +103,16 @@ end
 -- Toggle between dark and light
 function M.ToggleMode()
   M.mode = (M.mode == "dark") and "light" or "dark"
-  -- Reset if specific variants are light-only (like catppuccin-latte)
-  if M.mode == "light" and M.theme == "catppuccin" then M.variant = "latte" end
-  if M.mode == "dark" and M.theme == "catppuccin" and M.variant == "latte" then M.variant = "mocha" end
+  -- Reset if specific variants are light-only
+  if M.mode == "light" then
+    if M.theme == "catppuccin" then M.variant = "latte" end
+    if M.theme == "rose-pine" then M.variant = "dawn" end
+    if M.theme == "tokyonight" then M.variant = "day" end
+  else
+    if M.theme == "catppuccin" and M.variant == "latte" then M.variant = "mocha" end
+    if M.theme == "rose-pine" and M.variant == "dawn" then M.variant = "main" end
+    if M.theme == "tokyonight" and M.variant == "day" then M.variant = "moon" end
+  end
   M.Apply()
 end
 
@@ -117,5 +139,32 @@ function M.RestoreTheme()
   end
   M.Apply()
 end
+
+function M.FixCursor()
+  -- Using bright, colorful backgrounds to ensure the cursor is visible 
+  -- even if the terminal ignores the foreground (text) color.
+  if vim.o.background == "light" then
+    -- Light mode: High-contrast Orange background, Black text
+    vim.api.nvim_set_hl(0, "Cursor", { fg = "#000000", bg = "#FF9E3B", bold = true })
+    vim.api.nvim_set_hl(0, "TermCursor", { fg = "#000000", bg = "#FF9E3B" })
+  else
+    -- Dark mode: High-contrast Cyan background, Black text
+    vim.api.nvim_set_hl(0, "Cursor", { fg = "#000000", bg = "#00FFFF", bold = true })
+    vim.api.nvim_set_hl(0, "TermCursor", { fg = "#000000", bg = "#00FFFF" })
+  end
+  
+  -- Use a block cursor for all modes to maximize visibility of the color
+  vim.opt.guicursor = "n-v-c-i:block-Cursor,a:blinkwait700-blinkoff400-blinkon250-Cursor"
+end
+
+-- Ensure highlights are re-applied if the colorscheme is changed manually
+vim.api.nvim_create_autocmd({ "ColorScheme", "VimEnter" }, {
+  callback = function()
+    -- Standard delay to ensure overrides stick
+    vim.defer_fn(function()
+      M.FixCursor()
+    end, 300)
+  end,
+})
 
 return M
