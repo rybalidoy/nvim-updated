@@ -50,6 +50,11 @@ vim.api.nvim_create_autocmd(
 
 -- Toggle file explorer (NvimTree)
 vim.keymap.set("n", "<leader>e", ":NvimTreeToggle<CR>", { desc = "Toggle file explorer" })
+-- Window resizing
+vim.keymap.set("n", "<M-Up>", ":resize +2<CR>", { desc = "Increase window height" })
+vim.keymap.set("n", "<M-Down>", ":resize -2<CR>", { desc = "Decrease window height" })
+vim.keymap.set("n", "<M-Left>", ":vertical resize -2<CR>", { desc = "Decrease window width" })
+vim.keymap.set("n", "<M-Right>", ":vertical resize +2<CR>", { desc = "Increase window width" })
 
 -- Theme selection (using ColorMyPencils)
 vim.keymap.set("n", "<leader>ct", function()
