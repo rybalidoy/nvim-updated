@@ -15,6 +15,7 @@ return {
         json = { "prettierd" },
         yaml = { "prettierd" },
         markdown = { "prettierd" },
+        rust = { "rustfmt" },
       },
       format_on_save = {
         timeout_ms = 500,
@@ -27,7 +28,7 @@ return {
 
       -- Set formatexpr for specific filetypes so that '=' uses conform
       vim.api.nvim_create_autocmd("FileType", {
-        pattern = { "javascript", "typescript", "javascriptreact", "typescriptreact", "vue", "css", "html", "json", "yaml", "markdown" },
+        pattern = { "javascript", "typescript", "javascriptreact", "typescriptreact", "vue", "css", "html", "json", "yaml", "markdown", "rust" },
         callback = function()
           vim.bo.formatexpr = "v:lua.require'conform'.formatexpr()"
         end,

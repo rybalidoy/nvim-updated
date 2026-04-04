@@ -33,6 +33,7 @@ return {
 					"volar",
 					"biome",
 					"eslint",
+					"rust_analyzer",
 				},
 			})
 
@@ -50,6 +51,7 @@ return {
 				"volar",
 				"biome",
 				"eslint",
+				"rust_analyzer",
 			}
 
 			for _, server in ipairs(servers) do
@@ -80,6 +82,21 @@ return {
 
 				-- Disable formatting for ts_ls if Biome is handling it
 				if server == "ts_ls" then
+					local mason_registry = require("mason-registry")
+					local vue_plugin_path = mason_registry.get_package("vue-language-server"):get_install_path()
+						.. "/node_modules/@vue/language-server/node_modules/@vue/typescript-plugin"
+
+					config.init_options = {
+						plugins = {
+							{
+								name = "@vue/typescript-plugin",
+								location = vue_plugin_path,
+								languages = { "vue" },
+							},
+						},
+					}
+					config.filetypes = { "javascript", "typescript", "vue" }
+
 					config.on_attach = function(client)
 						if has_biome then
 							client.server_capabilities.documentFormattingProvider = false
@@ -105,7 +122,7 @@ return {
 					local tsdk = (vim.fn.isdirectory(local_ts) == 1) and local_ts or nil
 					config.init_options = {
 						typescript = tsdk and { tsdk = tsdk } or nil,
-						vue = { hybridMode = false },
+						vue = { hybridMode = true },
 					}
 				end
 

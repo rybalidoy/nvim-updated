@@ -7,7 +7,7 @@ return {
     opts = {
       ensure_installed = { 
         "lua", "vim", "vimdoc", "javascript", "typescript", 
-        "html", "css", "json", "bash", "php", "vue", "blade" 
+        "html", "css", "json", "bash", "php", "vue", "blade", "rust" 
       },
       auto_install = true,
       highlight = { enable = true },
